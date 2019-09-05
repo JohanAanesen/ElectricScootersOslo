@@ -1,7 +1,7 @@
 
 # API's
-* https://api.goflash.com/api/Mobile/Scooters?userLatitude=47.36&userLongitude=8.55&lang=de&latitude=47.36&longitude=8.55&latitudeDelta=0.01&longitudeDelta=0.01
-* https://api.voiapp.io/v1/vehicle/status/ready?lat=59.329323&lng=18.068581
+* https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.75&lang=en&latitude=59.925733&longitude=10.757766&latitudeDelta=0.01&longitudeDelta=0.01
+* https://api.voiapp.io/v1/vehicle/status/ready?lat=59.925733&lng=10.757766
 * https://platform.tier-services.io/vehicle?zoneId=OSLO x-api-key: bpEUTJEBTf74oGRWxaIcW7aeZMzDDODe1yBoSxi2
 
 
