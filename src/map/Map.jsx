@@ -10,17 +10,20 @@ export default function Map() {
 	const [tier, setTier] = useState([]);
 	const [circ, setCirc] = useState([]);
 	const [voi, setVoi] = useState([]);
-	const [lat, setLat] = useState('');
-	const [long, setLong] = useState('');
+	const [lat, setLat] = useState('59.91');
+	const [long, setLong] = useState('10.72');
 	const { latitude, longitude } = usePosition();
 
 	const [count, setCount] = useState(0);
 
 	useEffect(() => {
-		loadTiers();
-		loadCircs();
-		loadVois();
-	}, [long, lat]);
+		if (ready) {
+			loadTiers();
+			loadCircs();
+			loadVois();
+		}
+
+	}, [long, lat, ready]);
 
 	const loadTiers = async () => {
 		return await getTiers();
@@ -66,7 +69,7 @@ export default function Map() {
 			const tempCirc8 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.91&userLongitude=10.74&lang=en&latitude=59.91&longitude=10.74&latitudeDelta=1&longitudeDelta=1`)).data;
 			const tempCirc9 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.74&lang=en&latitude=59.92&longitude=10.74&latitudeDelta=1&longitudeDelta=1`)).data;
 			const tempCirc10 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.93&userLongitude=10.74&lang=en&latitude=59.93&longitude=10.74&latitudeDelta=1&longitudeDelta=1`)).data;
-			const combinedData = [...tempCirc.Data.Scooters,...tempCirc2.Data.Scooters,...tempCirc3.Data.Scooters, ...tempCirc4.Data.Scooters, ...tempCirc5.Data.Scooters, ...tempCirc6.Data.Scooters, ...tempCirc7.Data.Scooters, ...tempCirc8.Data.Scooters, ...tempCirc9.Data.Scooters, ...tempCirc10.Data.Scooters]
+			const combinedData = [...tempCirc.Data.Scooters, ...tempCirc2.Data.Scooters, ...tempCirc3.Data.Scooters, ...tempCirc4.Data.Scooters, ...tempCirc5.Data.Scooters, ...tempCirc6.Data.Scooters, ...tempCirc7.Data.Scooters, ...tempCirc8.Data.Scooters, ...tempCirc9.Data.Scooters, ...tempCirc10.Data.Scooters]
 
 			setCirc(combinedData);
 		} catch (e) {
@@ -78,7 +81,7 @@ export default function Map() {
 		try {
 			const tempVoi = (await Axios.get(`https://shrouded-eyrie-46546.herokuapp.com/`)).data;
 			setVoi(tempVoi);
-		} catch(e) {
+		} catch (e) {
 			console.log(e.message);
 		}
 	}
@@ -117,7 +120,7 @@ export default function Map() {
 		});
 		new window.google.maps.Marker({
 			map,
-			position:  { lat: lat, lng: long },
+			position: { lat: lat, lng: long },
 			title: "userPosition"
 		});
 	}
@@ -128,18 +131,18 @@ export default function Map() {
 			center: { lat: lat, lng: long },
 			zoom: 17
 		},
-		onMount: addMarkers(tier,circ,voi)
+		onMount: addMarkers(tier, circ, voi)
 	};
 
 	return useObserver(() => (
 		<>
 			<h1>Tier, Voi and Circ el-scooters near you!</h1>
 			<h1>{count} scooters loaded</h1>
-			{(!ready) 
-			?	<button
+			{(!ready)
+				? <button
 					onClick={showMap}
 				>Find scooters near me!</button>
-			:	<MapComponent {...mapProps}></MapComponent>
+				: <MapComponent {...mapProps}></MapComponent>
 			}
 		</>
 	));
