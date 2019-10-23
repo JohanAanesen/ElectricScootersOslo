@@ -68,7 +68,6 @@ export default function Map() {
 			const tempCirc10 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.93&userLongitude=10.74&lang=en&latitude=59.93&longitude=10.74&latitudeDelta=1&longitudeDelta=1`)).data;
 			const combinedData = [...tempCirc.Data.Scooters,...tempCirc2.Data.Scooters,...tempCirc3.Data.Scooters, ...tempCirc4.Data.Scooters, ...tempCirc5.Data.Scooters, ...tempCirc6.Data.Scooters, ...tempCirc7.Data.Scooters, ...tempCirc8.Data.Scooters, ...tempCirc9.Data.Scooters, ...tempCirc10.Data.Scooters]
 
-			console.log(combinedData);
 			setCirc(combinedData);
 		} catch (e) {
 			console.log(e.message);
