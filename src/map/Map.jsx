@@ -66,7 +66,7 @@ export default function Map() {
 
 	async function getVois() {
 		try {
-			const tempVoi = (await Axios.get(`https://cors-anywhere.herokuapp.com/https://api.voiapp.io/v1/vehicle/status/ready?lat=${lat}&lng=${long}`)).data;
+			const tempVoi = (await Axios.get(`https://shrouded-eyrie-46546.herokuapp.com/`)).data;
 			setVoi(tempVoi);
 		} catch(e) {
 			console.log(e.message);
