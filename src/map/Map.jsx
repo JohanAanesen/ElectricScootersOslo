@@ -2,18 +2,23 @@ import React, { useEffect, useState } from "react";
 import MapComponent from "./MapComponent";
 import { useObserver } from "mobx-react-lite";
 import Axios from "axios";
-import { ApiURL } from "../api-config";
+import { usePosition } from 'use-position';
+
 
 export default function Map() {
+	const [ready, setReady] = useState(false);
 	const [tier, setTier] = useState([]);
 	const [circ, setCirc] = useState([]);
 	const [voi, setVoi] = useState([]);
+	const [lat, setLat] = useState('');
+	const [long, setLong] = useState('');
+	const { latitude, longitude } = usePosition();
 
 	useEffect(() => {
 		loadTiers();
 		loadCircs();
 		loadVois();
-	}, []);
+	}, [long, lat]);
 
 	const loadTiers = async () => {
 		return await getTiers();
@@ -27,58 +32,60 @@ export default function Map() {
 		return await getVois();
 	};
 
+	function showMap() {
+		setLat(latitude);
+		setLong(longitude);
+		setReady(true);
+	}
+
 	async function getTiers() {
 		try {
-			const tempTiers = (await Axios.get(ApiURL.tier, {
+			const tempTiers = (await Axios.get(`https://cors-anywhere.herokuapp.com/https://platform.tier-services.io/vehicle?lat=${lat}&lng=${long}&radius=5000`, {
 				headers: {
-					"x-api-key": ApiURL.tierApiKey
+					"x-api-key": "bpEUTJEBTf74oGRWxaIcW7aeZMzDDODe1yBoSxi2",
 				}
 			})).data;
 
-			console.log(tempTiers);
 			setTier(tempTiers.data);
 		} catch (e) {
-			alert(e.message);
+			console.log(e.message);
 		}
 	}
 
 	async function getCircs() {
 		try {
-			const tempCirc = (await Axios.get(ApiURL.circ)).data;
-
-			console.log(tempCirc.Data.Scooters);
-			setCirc(tempCirc.Data.Scooters);
+			const tempCirc = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.75&lang=en&latitude=${lat}&longitude=${long}&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc2 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.75&lang=en&latitude=${lat}&longitude=${long}&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc3 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.75&lang=en&latitude=${lat}&longitude=${long}&latitudeDelta=1&longitudeDelta=1`)).data;
+			const combinedData = {...tempCirc,...tempCirc2,...tempCirc3}
+			setCirc(combinedData.Data.Scooters);
 		} catch (e) {
-			alert(e.message);
+			console.log(e.message);
 		}
 	}
 
 	async function getVois() {
 		try {
-			const tempVoi = (await Axios.get(ApiURL.voi)).data;
-
-			console.log(tempVoi);
-			setCirc(tempVoi);
-		} catch (e) {
-			alert(e.message);
+			const tempVoi = (await Axios.get(`https://cors-anywhere.herokuapp.com/https://api.voiapp.io/v1/vehicle/status/ready?lat=${lat}&lng=${long}`)).data;
+			setVoi(tempVoi);
+		} catch(e) {
+			console.log(e.message);
 		}
 	}
 
-	const addTierMarkers = links => map => {
-		links.forEach(ti => {
-			const marker = new window.google.maps.Marker({
+	const addMarkers = (one, two, three) => map => {
+		one.forEach(ti => {
+			new window.google.maps.Marker({
 				map,
 				icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
 				position: { lat: ti.lat, lng: ti.lng },
 				title: ti.id
 			});
 		});
-	};
-
-	const addCircMarkers = links => map => {
-		links.forEach(ti => {
-			const marker = new window.google.maps.Marker({
+		two.forEach(ti => {
+			new window.google.maps.Marker({
 				map,
+				icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
 				position: {
 					lat: ti.location.latitude,
 					lng: ti.location.longitude
@@ -86,51 +93,39 @@ export default function Map() {
 				title: ti.ScooterCode
 			});
 		});
-	};
-
-	const addVoiMarkers = links => map => {
-		links.forEach(ti => {
-			const marker = new window.google.maps.Marker({
+		three.forEach(ti => {
+			new window.google.maps.Marker({
 				map,
-				position: {
-					lat: ti.location[0],
-					lng: ti.location[1]
-				},
+				icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+				position: { lat: ti.location[0], lng: ti.location[1] },
 				title: ti.id
 			});
 		});
-	};
+		new window.google.maps.Marker({
+			map,
+			position:  { lat: lat, lng: long },
+			title: "userPosition"
+		});
+	}
+
 
 	const mapProps = {
 		options: {
-			center: { lat: 59.925733, lng: 10.757766 },
-			zoom: 13
+			center: { lat: lat, lng: long },
+			zoom: 17
 		},
-		onMount: addCircMarkers(circ)
-	};
-
-	const mapProps2 = {
-		options: {
-			center: { lat: 59.925733, lng: 10.757766 },
-			zoom: 13
-		},
-		onMount: addTierMarkers(tier)
-	};
-
-	const mapProps3 = {
-		options: {
-			center: { lat: 59.925733, lng: 10.757766 },
-			zoom: 13
-		},
-		onMount: addVoiMarkers(voi)
+		onMount: addMarkers(tier,circ,voi)
 	};
 
 	return useObserver(() => (
 		<>
-			<h1>Tier and Circ el-scooters in Oslo:</h1>
-			<MapComponent {...mapProps}></MapComponent>
-			<MapComponent {...mapProps2}></MapComponent>
-			<MapComponent {...mapProps3}></MapComponent>
+			<h1>Tier and Circ el-scooters near you!</h1>
+			{(!ready) 
+			?	<button
+					onClick={showMap}
+				>Find scooters near me!</button>
+			:	<MapComponent {...mapProps}></MapComponent>
+			}
 		</>
 	));
 }
