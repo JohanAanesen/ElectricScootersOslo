@@ -14,6 +14,8 @@ export default function Map() {
 	const [long, setLong] = useState('');
 	const { latitude, longitude } = usePosition();
 
+	const [count, setCount] = useState(0);
+
 	useEffect(() => {
 		loadTiers();
 		loadCircs();
@@ -53,12 +55,21 @@ export default function Map() {
 	}
 
 	async function getCircs() {
-		try {
-			const tempCirc = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.75&lang=en&latitude=${lat}&longitude=${long}&latitudeDelta=1&longitudeDelta=1`)).data;
-			const tempCirc2 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.75&lang=en&latitude=${lat}&longitude=${long}&latitudeDelta=1&longitudeDelta=1`)).data;
-			const tempCirc3 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.75&lang=en&latitude=${lat}&longitude=${long}&latitudeDelta=1&longitudeDelta=1`)).data;
-			const combinedData = {...tempCirc,...tempCirc2,...tempCirc3}
-			setCirc(combinedData.Data.Scooters);
+		try { //59.917283, 10.714115
+			const tempCirc = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=${lat}&userLongitude=${long}&lang=en&latitude=${lat}&longitude=${long}&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc2 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.75&lang=en&latitude=59.92&longitude=10.75&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc3 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.91&userLongitude=10.74&lang=en&latitude=59.91&longitude=10.74&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc4 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.91&userLongitude=10.71&lang=en&latitude=59.91&longitude=10.71&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc5 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.71&lang=en&latitude=59.92&longitude=10.71&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc6 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.72&lang=en&latitude=59.92&longitude=10.72&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc7 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.73&lang=en&latitude=59.92&longitude=10.73&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc8 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.91&userLongitude=10.74&lang=en&latitude=59.91&longitude=10.74&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc9 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.92&userLongitude=10.74&lang=en&latitude=59.92&longitude=10.74&latitudeDelta=1&longitudeDelta=1`)).data;
+			const tempCirc10 = (await Axios.get(`https://api.goflash.com/api/Mobile/Scooters?userLatitude=59.93&userLongitude=10.74&lang=en&latitude=59.93&longitude=10.74&latitudeDelta=1&longitudeDelta=1`)).data;
+			const combinedData = [...tempCirc.Data.Scooters,...tempCirc2.Data.Scooters,...tempCirc3.Data.Scooters, ...tempCirc4.Data.Scooters, ...tempCirc5.Data.Scooters, ...tempCirc6.Data.Scooters, ...tempCirc7.Data.Scooters, ...tempCirc8.Data.Scooters, ...tempCirc9.Data.Scooters, ...tempCirc10.Data.Scooters]
+
+			console.log(combinedData);
+			setCirc(combinedData);
 		} catch (e) {
 			console.log(e.message);
 		}
@@ -74,31 +85,35 @@ export default function Map() {
 	}
 
 	const addMarkers = (one, two, three) => map => {
+		let nrOfScooters = 0;
+		nrOfScooters = one.length + two.length + three.length;
+		setCount(nrOfScooters);
+
 		one.forEach(ti => {
 			new window.google.maps.Marker({
 				map,
 				icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
 				position: { lat: ti.lat, lng: ti.lng },
-				title: ti.id
+				title: `${ti.id} - Battery: ${ti.batteryLevel}`
 			});
 		});
 		two.forEach(ti => {
 			new window.google.maps.Marker({
 				map,
-				icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+				icon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png",
 				position: {
 					lat: ti.location.latitude,
 					lng: ti.location.longitude
 				},
-				title: ti.ScooterCode
+				title: `${ti.ScooterCode} - Battery: ${ti.PowerPercent} `
 			});
 		});
 		three.forEach(ti => {
 			new window.google.maps.Marker({
 				map,
-				icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+				icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
 				position: { lat: ti.location[0], lng: ti.location[1] },
-				title: ti.id
+				title: `${ti.id} - Battery: ${ti.battery}`
 			});
 		});
 		new window.google.maps.Marker({
@@ -119,7 +134,8 @@ export default function Map() {
 
 	return useObserver(() => (
 		<>
-			<h1>Tier and Circ el-scooters near you!</h1>
+			<h1>Tier, Voi and Circ el-scooters near you!</h1>
+			<h1>{count} scooters loaded</h1>
 			{(!ready) 
 			?	<button
 					onClick={showMap}
