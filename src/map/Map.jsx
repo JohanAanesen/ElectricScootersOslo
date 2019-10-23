@@ -79,7 +79,7 @@ export default function Map() {
 
 	async function getVois() {
 		try {
-			const tempVoi = (await Axios.get(`https://shrouded-eyrie-46546.herokuapp.com/`)).data;
+			const tempVoi = (await Axios.get(`https://voipub.herokuapp.com/`)).data;
 			setVoi(tempVoi);
 		} catch (e) {
 			console.log(e.message);
